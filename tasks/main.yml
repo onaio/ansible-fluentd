@@ -1,2 +1,6 @@
 ---
-# tasks file for role
+- name: Install Fluentd
+  include_tasks: install.yml
+
+- name: Configure Fluentd
+  include_tasks: configure.yml
