@@ -69,6 +69,7 @@ def test_td_agent_configuration(host):
         timekey 30m
         timekey_wait 10m
         timekey_use_utc true
+        flush_at_shutdown true
     </buffer>
 </match>
 """

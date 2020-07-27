@@ -48,5 +48,6 @@
         timekey {{ fluentd_s3_buffer_timekey }}
         timekey_wait {{ fluentd_s3_buffer_timekey_wait }}
         timekey_use_utc true
+        flush_at_shutdown true
     </buffer>
 </match>
