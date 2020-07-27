@@ -62,8 +62,10 @@ Including an example of how to use your role (for instance, with variables passe
       fluentd_monitoring_groups:
         - adm
       fluentd_log_paths:
-        - tag: nginx
-          path: /var/log/nginx/*
+        - tag: auth
+          path: /var/log/auth.log*
+        - tag: syslog
+          path: /var/log/syslog*
       fluentd_aws_key_id: test_key_id
       fluentd_aws_secret_key: test_secret_key
       fluentd_s3_bucket: test-bucket
