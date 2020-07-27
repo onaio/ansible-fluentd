@@ -1,7 +1,6 @@
 ---
 fluentd_td_version: "4"
 fluentd_service_name: "td-agent"
-fluentd_flush_logs_service_name: "td-agent-flush-logs"
 fluentd_system_user: "td-agent"
 fluentd_monitoring_groups:
   - adm

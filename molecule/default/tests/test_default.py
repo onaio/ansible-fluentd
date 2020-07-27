@@ -13,12 +13,6 @@ def test_td_agent_service(host):
     assert td_agent_service.is_enabled
 
 
-def test_td_agent_flush_logs_service(host):
-    td_agent_flush_logs_service = host.service("td-agent-flush-logs")
-
-    assert td_agent_flush_logs_service.is_enabled
-
-
 def test_td_agent_user_added_to_monitoring_group(host):
     td_agent_user = host.user("td-agent")
 

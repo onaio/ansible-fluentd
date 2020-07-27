@@ -11,9 +11,3 @@
     groups: "{{ fluentd_monitoring_groups }}"
     append: true
   notify: restart fluentd
-
-- name: Copy td-agent flush logs systemd Unit File
-  template:
-    src: td-agent-flush-logs.service.j2
-    dest: "/etc/systemd/system/{{ fluentd_flush_logs_service_name }}.service"
-  notify: restart td-agent-flush-logs

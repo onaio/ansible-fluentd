@@ -5,10 +5,3 @@
     state: restarted
     enabled: true
     daemon_reload: true
-
-- name: restart td-agent-flush-logs
-  systemd:
-    name: "{{ fluentd_flush_logs_service_name }}"
-    state: restarted
-    enabled: true
-    daemon_reload: true
