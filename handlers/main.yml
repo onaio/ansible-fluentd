@@ -1,2 +1,7 @@
 ---
-# handlers file for role
+- name: restart fluentd
+  systemd:
+    name: "{{ fluentd_service_name }}"
+    state: restarted
+    enabled: true
+    daemon_reload: true

@@ -4,7 +4,7 @@ dependency:
 driver:
   name: docker
 platforms:
-  - name: ansible-role-ubuntu-18.04
+  - name: ansible-fluentd-ubuntu-18.04
     image: solita/ubuntu-systemd:18.04
     dockerfile: Dockerfile.j2
     privileged: true
@@ -15,5 +15,6 @@ lint: |
   set -e
   yamllint .
   ansible-lint .
+  flake8
 verifier:
-  name: ansible
+  name: testinfra

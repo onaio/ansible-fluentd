@@ -1,0 +1,17 @@
+---
+- name: Add td-agent apt key
+  apt_key:
+    url: https://packages.treasuredata.com/GPG-KEY-td-agent
+    state: present
+
+- name: Add treasure data repository to apt
+  apt_repository:
+    repo: deb http://packages.treasuredata.com/{{ fluentd_td_version }}/ubuntu/{{ ansible_distribution_release }}/ {{ ansible_distribution_release }} contrib
+    state: present
+    filename: treasure-data
+
+- name: Install td-agent
+  apt:
+    name: td-agent
+    update_cache: true
+    state: present

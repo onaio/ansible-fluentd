@@ -1,2 +1,25 @@
 ---
-# defaults file for role
+fluentd_td_version: "4"
+fluentd_service_name: "td-agent"
+fluentd_system_user: "td-agent"
+fluentd_monitoring_groups:
+  - adm
+
+# input config
+fluentd_source_log_pos_directory: "/var/log/td-agent/pos"
+fluentd_log_paths:
+  - tag: auth
+    path: /var/log/auth.log*
+  - tag: syslog
+    path: /var/log/syslog*
+
+# output config
+fluentd_aws_key_id: ""
+fluentd_aws_secret_key: ""
+fluentd_s3_bucket: "logs"
+fluentd_s3_region: ""
+fluentd_server_owner: ""
+fluentd_server_environment: ""
+fluentd_s3_buffer_file_path: "/var/log/td-agent/s3"
+fluentd_s3_buffer_timekey: "30m"
+fluentd_s3_buffer_timekey_wait: "10m"

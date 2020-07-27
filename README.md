@@ -1,22 +1,54 @@
-Ansible Role [![Build Status](https://github.com/onaio/ansible-role/workflows/CI/badge.svg)](https://github.com/onaio/ansible-role/actions?query=workflow%3ACI)
+onaio - Fluentd [![Build Status](https://github.com/onaio/ansible-fluentd/workflows/CI/badge.svg)](https://github.com/onaio/ansible-fluentd/actions?query=workflow%3ACI)
 =========
 
-A brief description of the role goes here.
+Ansible role that installs and configures Fluentd. This role installs `td-agent`. See [differences between td-agent and Fluentd here](https://www.fluentd.org/faqs).
 
 Requirements
 ------------
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+N/A
 
 Role Variables
 --------------
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+Check the [defaults/main.yml](./defaults/main.yml) file for the full list of default variables.
+
+```yml
+---
+# version of td-agent
+fluentd_td_version: "4"
+# name of the td-agent service
+fluentd_service_name: "td-agent"
+# system user for td-agent service
+fluentd_system_user: "td-agent"
+# list of groups to add the td-agent user to
+fluentd_monitoring_groups:
+  - adm
+
+# input config
+# directory to store the last read position of a log
+fluentd_source_log_pos_directory: "/var/log/td-agent"
+# log paths to tail
+fluentd_log_paths:
+  - tag: "nginx"
+    path: "/var/log/nginx/*"
+
+# output config
+fluentd_aws_key_id: ""
+fluentd_aws_secret_key: ""
+fluentd_s3_bucket: "logs"
+fluentd_s3_region: ""
+fluentd_server_owner: ""
+fluentd_server_environment: ""
+fluentd_s3_buffer_file_path: "/var/log/td-agent/s3"
+fluentd_s3_buffer_timekey: "30m"
+fluentd_s3_buffer_timekey_wait: "10m"
+```
 
 Dependencies
 ------------
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+N/A
 
 Example Playbook
 ----------------
@@ -26,7 +58,20 @@ Including an example of how to use your role (for instance, with variables passe
 ```yml
 - hosts: servers
   roles:
-    - { role: username.rolename, x: 42 }
+    - role: ansible-fluentd
+      fluentd_monitoring_groups:
+        - adm
+      fluentd_log_paths:
+        - tag: auth
+          path: /var/log/auth.log*
+        - tag: syslog
+          path: /var/log/syslog*
+      fluentd_aws_key_id: test_key_id
+      fluentd_aws_secret_key: test_secret_key
+      fluentd_s3_bucket: test-bucket
+      fluentd_s3_region: eu-west-1
+      fluentd_server_owner: ona
+      fluentd_server_environment: test
 ```
 
 License

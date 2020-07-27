@@ -1,0 +1,13 @@
+---
+- name: Copy Fluentd configuration
+  template:
+    src: td-agent.conf.j2
+    dest: /etc/td-agent/td-agent.conf
+  notify: restart fluentd
+
+- name: Add Fluentd system user to groups
+  user:
+    name: "{{ fluentd_system_user }}"
+    groups: "{{ fluentd_monitoring_groups }}"
+    append: true
+  notify: restart fluentd
