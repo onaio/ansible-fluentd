@@ -60,7 +60,7 @@ def test_td_agent_configuration(host):
     aws_sec_key test_secret_key
     s3_bucket test-bucket
     s3_region eu-west-1
-    path "ona/test/#{Socket.gethostname}"
+    path "ona/test/#{Socket.gethostname}/10.160.0.158"
     s3_object_key_format %{path}/${tag[1]}_%{time_slice}_%{index}.%{file_extension}
     store_as gzip
     time_slice_format %Y-%m-%d_%H:%M
