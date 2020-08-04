@@ -31,6 +31,7 @@ def test_td_agent_configuration(host):
     pos_file /var/log/td-agent/pos/nginx_log.pos
     tag s3.nginx
     read_from_head true
+    path_key tailed_path
 
     <parse>
         @type none
@@ -59,9 +60,10 @@ def test_td_agent_configuration(host):
     aws_sec_key test_secret_key
     s3_bucket test-bucket
     s3_region eu-west-1
-    path ona/test/${tag}/
-    s3_object_key_format %{path}%{time_slice}_%{index}.%{file_extension}
+    path "ona/test/#{Socket.gethostname}/10.160.0.158"
+    s3_object_key_format %{path}/${tag[1]}_%{time_slice}_%{index}.%{file_extension}
     store_as gzip
+    time_slice_format %Y-%m-%d_%H:%M
 
     <buffer tag,time>
         @type file
@@ -72,6 +74,6 @@ def test_td_agent_configuration(host):
         flush_at_shutdown true
     </buffer>
 </match>
-"""
+"""  # noqa: E501
 
     assert td_agent_conf_file.content_string == expected_conf_content

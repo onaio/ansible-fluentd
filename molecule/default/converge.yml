@@ -21,3 +21,4 @@
       fluentd_s3_region: eu-west-1
       fluentd_server_owner: ona
       fluentd_server_environment: test
+      fluentd_server_private_ipv4_address: "10.160.0.158"

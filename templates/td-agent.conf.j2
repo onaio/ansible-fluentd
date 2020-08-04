@@ -9,6 +9,7 @@
     pos_file {{ fluentd_source_log_pos_directory }}/{{ log_file.tag }}_log.pos
     tag s3.{{ log_file.tag }}
     read_from_head true
+    path_key tailed_path
 
     <parse>
         @type none
@@ -38,9 +39,10 @@
     aws_sec_key {{ fluentd_aws_secret_key }}
     s3_bucket {{ fluentd_s3_bucket }}
     s3_region {{ fluentd_s3_region }}
-    path {{ fluentd_server_owner }}/{{ fluentd_server_environment }}/${tag}/
-    s3_object_key_format %{path}%{time_slice}_%{index}.%{file_extension}
+    path "{{ fluentd_server_owner }}/{{ fluentd_server_environment }}/#{Socket.gethostname}/{{ fluentd_server_private_ipv4_address }}"
+    s3_object_key_format %{path}/${tag[1]}_%{time_slice}_%{index}.%{file_extension}
     store_as gzip
+    time_slice_format %Y-%m-%d_%H:%M
 
     <buffer tag,time>
         @type file
