@@ -2,5 +2,22 @@
 - name: Install Fluentd
   include_tasks: install.yml
 
+- name: Create conf.d/ansible directory
+  ansible.builtin.file:
+    path: "{{ fluentd_extra_config_file_dir }}"
+    state: directory
+
+- name: Clear existing files in conf.d/ansible directory
+  shell: |
+    rm {{ fluentd_extra_config_file_dir }}/*.*
+
+- name: Setup (legacy)
+  include_tasks: setup-legacy.yml
+  when: fluentd_s3_bucket_legacy
+
+- name: Setup
+  include_tasks: setup.yml
+  when: not fluentd_s3_bucket_legacy
+
 - name: Configure Fluentd
   include_tasks: configure.yml

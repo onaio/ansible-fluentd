@@ -1,4 +1,10 @@
 ---
+- name: Install fluentd plugin(s)
+  shell: |
+    /usr/sbin/td-agent-gem install {{ item }} --no-document
+  with_items: "{{ fluentd_extra_plugins }}"
+  when: fluentd_extra_plugins | length > 0
+
 - name: Copy Fluentd configuration
   template:
     src: td-agent.conf.j2

@@ -1,0 +1,6 @@
+---
+- name: Copy Fluentd configuration
+  template:
+    src: s3-legacy.conf.j2
+    dest: "{{ fluentd_extra_config_file_dir }}/s3-legacy.conf"
+  notify: restart fluentd

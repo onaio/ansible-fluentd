@@ -1,0 +1,6 @@
+---
+- name: Create fluentd conf file(s)
+  ansible.builtin.copy:
+    dest: "{{ fluentd_extra_config_file_dir }}/{{ item.name }}.conf"
+    content: "{{ item.conf }}"
+  with_items: "{{ fluentd_configurations }}"

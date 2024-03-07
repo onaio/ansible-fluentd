@@ -24,3 +24,37 @@ fluentd_server_private_ipv4_address: "{{ ansible_default_ipv4.address | default(
 fluentd_s3_buffer_file_path: "/var/log/td-agent/s3"
 fluentd_s3_buffer_timekey: "30m"
 fluentd_s3_buffer_timekey_wait: "10m"
+fluentd_s3_bucket_legacy: false
+fluentd_extra_config_file_dir: "/etc/td-agent/conf.d/ansible"
+fluentd_extra_plugins: []
+#  - gelf
+#  - fluent-plugin-influxdb
+fluentd_configurations: []
+#  - name: nginx-access-log
+#    conf: |
+#      <source>
+#        @type tail
+#        format nginx
+#        pos_file /var/log/td-agent/tmp/nginx-access.log.pos
+#        tag nginx.access
+#        path /var/log/nginx/access.log
+#      </source>
+#      <match nginx.access>
+#        @type file
+#        path /var/log/td-agent/nginx-access
+#      </match>
+#  - name: syslog
+#    conf: |
+#      <source>
+#        @type syslog
+#        tag graylog2
+#      </source>
+#
+#      <match graylog2.**>
+#        @type gelf
+#        host 127.0.0.1
+#        port 12201
+#        <buffer>
+#          flush_interval 5s
+#        </buffer>
+#      </match>

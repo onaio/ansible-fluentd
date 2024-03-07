@@ -1,55 +1,8 @@
-####
-## Source descriptions:
-##
 
-{% for log_file in fluentd_log_paths %}
-<source>
-    @type tail
-    path {{ log_file.path }}
-    pos_file {{ fluentd_source_log_pos_directory }}/{{ log_file.tag }}_log.pos
-    tag s3.{{ log_file.tag }}
-    read_from_head true
-    path_key tailed_path
-
-    <parse>
-        @type none
-    </parse>
-</source>
-
+{% for configuration in fluentd_configurations %}
+@include "{{ fluentd_extra_config_file_dir }}/{{ configuration.name }}.conf"
 {% endfor %}
-####
-## Filter descriptions:
-##
 
-<filter s3.*>
-    @type record_transformer
-    <record>
-        hostname "#{Socket.gethostname}"
-        tag ${tag}
-    </record>
-</filter>
-
-####
-## Match descriptions:
-##
-
-<match s3.*>
-    @type s3
-    aws_key_id {{ fluentd_aws_key_id }}
-    aws_sec_key {{ fluentd_aws_secret_key }}
-    s3_bucket {{ fluentd_s3_bucket }}
-    s3_region {{ fluentd_s3_region }}
-    path "{{ fluentd_server_owner }}/{{ fluentd_server_environment }}/#{Socket.gethostname}/{{ fluentd_server_private_ipv4_address }}"
-    s3_object_key_format %{path}/${tag[1]}_%{time_slice}_%{index}.%{file_extension}
-    store_as gzip
-    time_slice_format %Y-%m-%d_%H:%M
-
-    <buffer tag,time>
-        @type file
-        path {{ fluentd_s3_buffer_file_path }}
-        timekey {{ fluentd_s3_buffer_timekey }}
-        timekey_wait {{ fluentd_s3_buffer_timekey_wait }}
-        timekey_use_utc true
-        flush_at_shutdown true
-    </buffer>
-</match>
+{% if fluentd_s3_bucket_legacy %}
+@include "{{ fluentd_extra_config_file_dir }}/s3-legacy.conf.j2"
+{% endif %}

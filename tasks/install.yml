@@ -6,7 +6,7 @@
 
 - name: Add treasure data repository to apt
   apt_repository:
-    repo: deb http://packages.treasuredata.com/{{ fluentd_td_version }}/ubuntu/{{ ansible_distribution_release }}/ {{ ansible_distribution_release }} contrib
+    repo: deb https://packages.treasuredata.com/{{ fluentd_td_version }}/ubuntu/{{ ansible_distribution_release }}/ {{ ansible_distribution_release }} contrib
     state: present
     filename: treasure-data
 
