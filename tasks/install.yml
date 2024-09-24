@@ -4,7 +4,7 @@
     dest: "{{ fluentd_system_environment_file }}"
     state: present
     regexp: "^GEM_HOME="
-    line: "GEM_HOME={{ fluentd_gem_home_directory }}"
+    line: 'GEM_HOME="{{ fluentd_gem_home_directory }}"'
   tags:
     - fluentd-install-update-gem-home
     - fluentd-install
@@ -14,7 +14,7 @@
     dest: "{{ fluentd_system_environment_file }}"
     state: present
     regexp: "^GEM_PATH="
-    line: "GEM_PATH={{ fluentd_gem_path_directory }}"
+    line: 'GEM_PATH="{{ fluentd_gem_path_directory }}"'
   tags:
     - fluentd-install-update-gem-path
     - fluentd-install
@@ -25,6 +25,9 @@
     name: "{{ item }}"
     state: present
     update_cache: true
+  environment:
+    GEM_PATH: "{{ fluentd_lib_directory }}"
+    GEM_HOME: "{{ fluentd_lib_directory }}"
   tags:
     - fluentd-install-ruby-packages
     - fluentd-install
@@ -37,6 +40,9 @@
   ansible.builtin.shell: |
     gem install {{ item.name }} -v {{ item.version | default('>=0') | quote }}  --no-document
   with_items: "{{ fluentd_required_gems }}"
+  environment:
+    GEM_PATH: "{{ fluentd_lib_directory }}"
+    GEM_HOME: "{{ fluentd_lib_directory }}"
   changed_when: true
   when: fluentd_required_gems | length > 0
   tags:
@@ -46,6 +52,9 @@
 - name: Install | fluentd {{ fluentd_version }}
   ansible.builtin.shell: |
     gem install fluentd -v {{ fluentd_version }} --no-document
+  environment:
+    GEM_PATH: "{{ fluentd_lib_directory }}"
+    GEM_HOME: "{{ fluentd_lib_directory }}"
   changed_when: true
   tags:
     - fluentd-install-fluentd

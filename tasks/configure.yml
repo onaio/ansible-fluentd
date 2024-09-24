@@ -3,6 +3,9 @@
   ansible.builtin.shell: |
     {{ fluentd_lib_directory }}/bin/fluent-gem install {{ item.name }} -v {{ item.version | default('>=0') | quote }} --no-document
   with_items: "{{ fluentd_extra_plugins }}"
+  environment:
+    GEM_PATH: "{{ fluentd_lib_directory }}"
+    GEM_HOME: "{{ fluentd_lib_directory }}"
   changed_when: true
   when: fluentd_extra_plugins | length > 0
   tags:

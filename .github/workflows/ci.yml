@@ -45,7 +45,7 @@ jobs:
           python-version: '3.x'
 
       - name: Install test dependencies
-        run: pip install ansible molecule molecule-plugins[docker] pytest-testinfra docker
+        run: pip install requests==2.31.0 ansible molecule molecule-plugins[docker] pytest-testinfra docker
 
       - name: Run Molecule tests
         run: molecule test --all

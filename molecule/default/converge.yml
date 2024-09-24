@@ -9,16 +9,20 @@
         state: present
 
   roles:
-    - role: ansible-fluentd
+    - role: "onaio.fluentd"
       fluentd_monitoring_groups:
         - adm
-      fluentd_log_paths:
-        - tag: nginx
-          path: /var/log/nginx/*
-      fluentd_aws_key_id: test_key_id
-      fluentd_aws_secret_key: test_secret_key
-      fluentd_s3_bucket: test-bucket
-      fluentd_s3_region: eu-west-1
-      fluentd_server_owner: ona
-      fluentd_server_environment: test
-      fluentd_server_private_ipv4_address: "10.160.0.158"
+      fluentd_configurations:
+        - name: nginx-access-log
+          conf: |
+            <source>
+              @type tail
+              format nginx
+              pos_file /var/log/fluent/tmp/nginx-access.log.pos
+              tag nginx.access
+              path /var/log/nginx/access.log
+            </source>
+            <match nginx.access>
+              @type file
+              path /var/log/fluent/nginx-access
+            </match>
