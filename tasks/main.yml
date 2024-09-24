@@ -1,23 +1,33 @@
 ---
-- name: Install Fluentd
-  include_tasks: install.yml
+- name: Install fluentd
+  ansible.builtin.include_tasks: install.yml
+  tags:
+    - fluentd-install
+    - fluentd
 
-- name: Create conf.d/ansible directory
-  ansible.builtin.file:
-    path: "{{ fluentd_extra_config_file_dir }}"
-    state: directory
-
-- name: Clear existing files in conf.d/ansible directory
-  shell: |
-    rm {{ fluentd_extra_config_file_dir }}/*.*
-
-- name: Setup (legacy)
-  include_tasks: setup-legacy.yml
+- name: Setup-legacy
+  ansible.builtin.include_tasks: setup-legacy.yml
   when: fluentd_s3_bucket_legacy
+  tags:
+    - fluentd-setup-legacy
+    - fluentd-setup
+    - fluentd
 
 - name: Setup
-  include_tasks: setup.yml
+  ansible.builtin.include_tasks: setup.yml
   when: not fluentd_s3_bucket_legacy
+  tags:
+    - fluentd-setup
+    - fluentd
 
-- name: Configure Fluentd
-  include_tasks: configure.yml
+- name: Setup-jemalloc
+  ansible.builtin.include_tasks: setup-jemalloc.yml
+  tags:
+    - fluentd-setup-jemalloc
+    - fluentd
+
+- name: Configure fluentd
+  ansible.builtin.include_tasks: configure.yml
+  tags:
+    - fluentd-configure
+    - fluentd

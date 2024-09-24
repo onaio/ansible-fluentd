@@ -1,6 +1,6 @@
 ---
-- name: restart fluentd
-  systemd:
+- name: Restart fluentd
+  ansible.builtin.systemd:
     name: "{{ fluentd_service_name }}"
     state: restarted
     enabled: true

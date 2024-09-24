@@ -1,0 +1,33 @@
+# {{ ansible_managed }}
+
+[Unit]
+Description=fluentd: All in one package of Fluentd
+Documentation=https://docs.fluentd.org/
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User={{ fluentd_system_user }}
+Group={{ fluentd_system_group }}
+LimitNOFILE=65536
+Environment=LD_PRELOAD={{ fluentd_lib_directory }}/libjemalloc.so.2
+Environment=GEM_HOME={{ fluentd_lib_directory }}
+Environment=GEM_PATH={{ fluentd_lib_directory }}
+Environment=FLUENT_CONF={{ fluentd_conf_directory }}/{{ fluentd_conf_file }}
+Environment=FLUENT_PLUGIN={{ fluentd_plugin_directory }}
+Environment=FLUENT_SOCKET=/var/run/fluent/fluentd.sock
+Environment=FLUENT_PACKAGE_LOG_FILE={{ fluentd_log_directory }}/{{ fluentd_log_file }}
+EnvironmentFile=-/etc/default/fluentd
+PIDFile=/var/run/fluent/fluentd.pid
+RuntimeDirectory=fluent
+Type=forking
+# XXX: Fix fluentd executables path
+ExecStart={{ fluentd_lib_directory }}/bin/fluentd --log $FLUENT_PACKAGE_LOG_FILE --daemon /var/run/fluent/fluentd.pid $FLUENT_PACKAGE_OPTIONS
+ExecStop=/bin/kill -TERM ${MAINPID}
+ExecReload=/bin/kill -HUP ${MAINPID}
+Restart=always
+TimeoutStopSec=120
+
+[Install]
+WantedBy=multi-user.target
+Alias=td-agent.service

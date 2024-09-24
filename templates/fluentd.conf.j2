@@ -1,3 +1,4 @@
+# {{ ansible_managed }}
 
 {% for configuration in fluentd_configurations %}
 @include "{{ fluentd_extra_config_file_dir }}/{{ configuration.name }}.conf"
