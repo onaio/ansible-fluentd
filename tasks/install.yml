@@ -1,20 +1,24 @@
 ---
 - name: Install | update GEM_HOME in {{ fluentd_system_environment_file }}
   ansible.builtin.lineinfile:
-    dest: "{{ fluentd_system_environment_file }}"
+    dest: "{{ item }}"
     state: present
     regexp: "^GEM_HOME="
     line: 'GEM_HOME="{{ fluentd_gem_home_directory }}"'
+  with_items: "{{ fluentd_system_environment_files }}"
+  when: fluentd_system_environment_files | length > 0
   tags:
     - fluentd-install-update-gem-home
     - fluentd-install
 
 - name: Install | update GEM_PATH in {{ fluentd_system_environment_file }}
   ansible.builtin.lineinfile:
-    dest: "{{ fluentd_system_environment_file }}"
+    dest: "{{ item }}"
     state: present
     regexp: "^GEM_PATH="
     line: 'GEM_PATH="{{ fluentd_gem_path_directory }}"'
+  with_items: "{{ fluentd_system_environment_files }}"
+  when: fluentd_system_environment_files | length > 0
   tags:
     - fluentd-install-update-gem-path
     - fluentd-install
@@ -25,28 +29,41 @@
     name: "{{ item }}"
     state: present
     update_cache: true
-  environment:
-    GEM_PATH: "{{ fluentd_lib_directory }}"
-    GEM_HOME: "{{ fluentd_lib_directory }}"
+  when:
+    - not fluentd_ruby_install_from_source and ((ansible_distribution != "Ubuntu") or (ansible_distribution == "Ubuntu" and ansible_distribution_major_version | int > 20))
   tags:
     - fluentd-install-ruby-packages
     - fluentd-install
   with_items:
-    - ruby
-    - ruby-dev
+    - ruby=1:3*
+    - ruby-dev=1:3*
     - gcc
+    - build-essential
+
+- name: Install | create fluentd lib directory {{ fluentd_lib_directory }}
+  ansible.builtin.file:
+    path: "{{ fluentd_lib_directory }}"
+    state: directory
+    mode: '0750'
+    owner: "{{ fluentd_system_user }}"
+    group: "{{ fluentd_system_group }}"
+    recurse: true
+  tags:
+    - fluentd-install-create-lib-directory
+    - fluentd-install
 
 - name: Install | add fluentd gem(s)
   ansible.builtin.shell: |
-    gem install {{ item.name }} -v {{ item.version | default('>=0') | quote }}  --no-document
+    gem install {{ item.name }} -v {{ item.version | default('>=0') | quote }} --no-document
   with_items: "{{ fluentd_required_gems }}"
   environment:
     GEM_PATH: "{{ fluentd_lib_directory }}"
     GEM_HOME: "{{ fluentd_lib_directory }}"
   changed_when: true
-  when: fluentd_required_gems | length > 0
+  when:
+    - fluentd_required_gems | length > 0
   tags:
-    - fluentd-install-add-plugin
+    - fluentd-install-add-gems
     - fluentd-install
 
 - name: Install | fluentd {{ fluentd_version }}

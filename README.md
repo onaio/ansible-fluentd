@@ -3,6 +3,23 @@ onaio - Fluentd [![Build Status](https://github.com/onaio/ansible-fluentd/workfl
 
 Ansible role that installs and configures [Fluentd](https://docs.fluentd.org/) as a [ruby gem](https://docs.fluentd.org/installation/install-by-gem).
 
+> NOTE: When running fluentd command on the server i.e. /opt/fluent/lib/bin/fluentd, ensure that the following  environment variables have been set:
+> - GEM_PATH={{ fluentd_lib_directory }} e.g. GEM_PATH=/opt/fluent/lib
+> - GEM_HOME={{ fluentd_lib_directory }} e.g. GEM_HOME=/opt/fluent/lib
+> - or alternatively specify the `bashrc` or `/etc/environment` files to be updated with `fluentd_system_environment_files: []`
+
+
+Supported Ubuntu Versions
+------------
+
+| Version | Supported          |
+|---------|--------------------|
+| 24.04   | :white_check_mark: |
+| 22.04   | :white_check_mark: |
+| 20.04   | :white_check_mark: |
+| 18.04   | :white_check_mark: |
+
+
 Requirements
 ------------
 
@@ -27,7 +44,6 @@ fluentd_log_file: "fluentd.log"
 fluentd_lib_directory: "/opt/fluent/lib"
 fluentd_gem_home_directory: "{{ fluentd_lib_directory }}"
 fluentd_gem_path_directory: "{{ fluentd_lib_directory }}"
-fluentd_system_environment_file: "/etc/environment"
 fluentd_plugin_directory: "/etc/fluent/plugin"
 
 fluentd_service_template: "etc/systemd/system/{{ fluentd_service_name }}.service.j2"

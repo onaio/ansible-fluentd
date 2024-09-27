@@ -1,23 +1,4 @@
 ---
-- name: Set-up | ensure exists  {{ fluentd_system_group }}
-  ansible.builtin.group:
-    name: "{{ fluentd_system_group }}"
-    state: present
-  tags:
-    - fluentd-setup-create-group
-    - fluentd-setup
-
-- name: Set-up | create user {{ fluentd_system_user }}
-  ansible.builtin.user:
-    name: "{{ fluentd_system_user }}"
-    group: "{{ fluentd_system_group }}"
-    shell: /sbin/nologin
-    create_home: false
-    state: present
-  tags:
-    - fluentd-setup-create-user
-    - fluentd-setup
-
 - name: Set-up | create fluentd config directory
   ansible.builtin.file:
     path: "{{ fluentd_conf_directory }}"
@@ -25,6 +6,7 @@
     mode: '0740'
     owner: "{{ fluentd_system_user }}"
     group: "{{ fluentd_system_group }}"
+    recurse: true
   tags:
     - fluentd-setup-create-config-directory
     - fluentd-setup
@@ -36,19 +18,9 @@
     mode: '0740'
     owner: "{{ fluentd_system_user }}"
     group: "{{ fluentd_system_group }}"
+    recurse: true
   tags:
     - fluentd-setup-create-config-directory
-    - fluentd-setup
-
-- name: Set-up | create fluentd directory {{ fluentd_lib_directory }}
-  ansible.builtin.file:
-    path: "{{ fluentd_lib_directory }}"
-    state: directory
-    mode: '0750'
-    owner: "{{ fluentd_system_user }}"
-    group: "{{ fluentd_system_group }}"
-  tags:
-    - fluentd-setup-create-lib-directory
     - fluentd-setup
 
 - name: Set-up | create fluentd log config directory
@@ -58,6 +30,7 @@
     mode: '0740'
     owner: "{{ fluentd_system_user }}"
     group: "{{ fluentd_system_group }}"
+    recurse: true
   tags:
     - fluentd-setup-create-log-directory
     - fluentd-setup

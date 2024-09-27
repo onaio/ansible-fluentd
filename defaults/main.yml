@@ -10,8 +10,12 @@ fluentd_log_file: "fluentd.log"
 fluentd_lib_directory: "/opt/fluent/lib"
 fluentd_gem_home_directory: "{{ fluentd_lib_directory }}"
 fluentd_gem_path_directory: "{{ fluentd_lib_directory }}"
-fluentd_system_environment_file: "/etc/environment"
 fluentd_plugin_directory: "/etc/fluent/plugin"
+fluentd_system_environment_files: []
+
+# install ruby from source from fluentd_ruby_download_url
+# FYI: it takes a while
+fluentd_ruby_install_from_source: false
 
 fluentd_service_template: "etc/systemd/system/{{ fluentd_service_name }}.service.j2"
 fluentd_service_path: "/etc/systemd/system/{{ fluentd_service_name }}.service"
@@ -48,6 +52,13 @@ fluentd_s3_buffer_timekey_wait: "10m"
 fluentd_s3_bucket_legacy: false
 
 fluentd_extra_config_file_dir: "{{ fluentd_conf_directory }}/conf.d/ansible"
+
+# start: installation from source
+fluentd_ruby_version: "3.1.0"  # Specify the Ruby version here for installation from source.
+fluentd_ruby_download_url: "https://cache.ruby-lang.org/pub/ruby/3.1/ruby-{{ fluentd_ruby_version }}.tar.gz"
+fluentd_ruby_install_path: "/opt/ruby"
+fluentd_ruby_bin_path: "/opt/ruby/{{ fluentd_ruby_version }}/bin/ruby"
+# end: installation from source
 
 # confirm compatibility from the official dockerfile https://github.com/fluent/fluentd-docker-image
 fluentd_required_gems:

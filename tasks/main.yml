@@ -1,8 +1,30 @@
 ---
+- name: Initialize env
+  ansible.builtin.include_tasks: initialize-env.yml
+  tags:
+    - fluentd-initialize-env
+    - fluentd
+
+# Setup ruby for ubuntu <= 20 or fluentd_ruby_install_from_source: true
+- name: Setup ruby
+  ansible.builtin.include_tasks: setup-ruby.yml
+  when:
+    - fluentd_ruby_install_from_source or (ansible_distribution == "Ubuntu" and ansible_distribution_major_version | int <= 20)
+  tags:
+    - fluentd-setup-ruby
+    - fluentd
+
 - name: Install fluentd
   ansible.builtin.include_tasks: install.yml
   tags:
     - fluentd-install
+    - fluentd
+
+- name: Setup
+  ansible.builtin.include_tasks: setup.yml
+  when: not fluentd_s3_bucket_legacy
+  tags:
+    - fluentd-setup
     - fluentd
 
 - name: Setup-legacy
@@ -10,13 +32,6 @@
   when: fluentd_s3_bucket_legacy
   tags:
     - fluentd-setup-legacy
-    - fluentd-setup
-    - fluentd
-
-- name: Setup
-  ansible.builtin.include_tasks: setup.yml
-  when: not fluentd_s3_bucket_legacy
-  tags:
     - fluentd-setup
     - fluentd
 

@@ -36,12 +36,27 @@
     - fluentd-setup-jemalloc-extract-release
     - fluentd-setup-jemalloc
 
-- name: Set-up jemalloc | run configure and make
+- name: Set-up jemalloc | disable madv free
   ansible.builtin.shell: |
-    cd /tmp/jemalloc-{{ fluentd_jemalloc_version }}/
-    echo "je_cv_madv_free=no" > config.cache
-    ./configure -C
-    make
+    echo "je_cv_madv_free=no" > /tmp/jemalloc-{{ fluentd_jemalloc_version }}/config.cache
+  changed_when: true
+  tags:
+    - fluentd-setup-jemalloc-build-release
+    - fluentd-setup-jemalloc
+
+- name: Set-up jemalloc | run configure
+  ansible.builtin.command: ./configure -C
+  args:
+    chdir: "/tmp/jemalloc-{{ fluentd_jemalloc_version }}"
+  changed_when: true
+  tags:
+    - fluentd-setup-jemalloc-build-release
+    - fluentd-setup-jemalloc
+
+- name: Set-up jemalloc | compile jemalloc
+  ansible.builtin.command: make
+  args:
+    chdir: "/tmp/jemalloc-{{ fluentd_jemalloc_version }}"
   changed_when: true
   tags:
     - fluentd-setup-jemalloc-build-release
