@@ -1,5 +1,5 @@
 ---
-- name: Install | update GEM_HOME in {{ fluentd_system_environment_file }}
+- name: Install | add GEM_HOME to fluentd_system_environment_files
   ansible.builtin.lineinfile:
     dest: "{{ item }}"
     state: present
@@ -11,7 +11,7 @@
     - fluentd-install-update-gem-home
     - fluentd-install
 
-- name: Install | update GEM_PATH in {{ fluentd_system_environment_file }}
+- name: Install | add GEM_PATH to fluentd_system_environment_files
   ansible.builtin.lineinfile:
     dest: "{{ item }}"
     state: present
@@ -35,10 +35,9 @@
     - fluentd-install-ruby-packages
     - fluentd-install
   with_items:
-    - ruby=1:3*
-    - ruby-dev=1:3*
     - gcc
     - build-essential
+    - "{{ fluentd_ruby_packages }}"
 
 - name: Install | create fluentd lib directory {{ fluentd_lib_directory }}
   ansible.builtin.file:

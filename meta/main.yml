@@ -3,7 +3,7 @@ galaxy_info:
   role_name: fluentd
   namespace: onaio
   author: Ona Engineering
-  description: Installs and configures Fluentd (td-agent). Fluentd is a data collector for unified logging layer.
+  description: Installs and configures Fluentd. Fluentd is a data collector for unified logging layer.
   company: Ona Systems Inc
   license: Apache-2.0
   min_ansible_version: "2.8"

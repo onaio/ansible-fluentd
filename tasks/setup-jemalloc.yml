@@ -41,7 +41,7 @@
     echo "je_cv_madv_free=no" > /tmp/jemalloc-{{ fluentd_jemalloc_version }}/config.cache
   changed_when: true
   tags:
-    - fluentd-setup-jemalloc-build-release
+    - fluentd-setup-jemalloc-disable-madv-release
     - fluentd-setup-jemalloc
 
 - name: Set-up jemalloc | run configure
@@ -59,7 +59,7 @@
     chdir: "/tmp/jemalloc-{{ fluentd_jemalloc_version }}"
   changed_when: true
   tags:
-    - fluentd-setup-jemalloc-build-release
+    - fluentd-setup-jemalloc-compile-release
     - fluentd-setup-jemalloc
 
 - name: Set-up jemalloc | move jemalloc
@@ -72,4 +72,12 @@
     remote_src: true
   tags:
     - fluentd-setup-jemalloc-move-release
+    - fluentd-setup-jemalloc
+
+- name: Set-up jemalloc | clean up source code
+  ansible.builtin.file:
+    path: "/tmp/jemalloc-{{ fluentd_jemalloc_version }}"
+    state: absent
+  tags:
+    - fluentd-setup-jemalloc-install-cleanup
     - fluentd-setup-jemalloc

@@ -1,5 +1,5 @@
 ---
-- name: Initialize-env | ensure system group exists  {{ fluentd_system_group }}
+- name: Initialize-env | ensure system group exists {{ fluentd_system_group }}
   ansible.builtin.group:
     name: "{{ fluentd_system_group }}"
     state: present
@@ -7,7 +7,7 @@
     - fluentd-initialize-env-create-group
     - fluentd-initialize-env
 
-- name: Initialize-env | create user {{ fluentd_system_user }}
+- name: Initialize-env | create system user {{ fluentd_system_user }}
   ansible.builtin.user:
     name: "{{ fluentd_system_user }}"
     group: "{{ fluentd_system_group }}"

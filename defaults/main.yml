@@ -13,7 +13,12 @@ fluentd_gem_path_directory: "{{ fluentd_lib_directory }}"
 fluentd_plugin_directory: "/etc/fluent/plugin"
 fluentd_system_environment_files: []
 
-# install ruby from source from fluentd_ruby_download_url
+# sets the ruby version to install when from linux distribution repositories
+fluentd_ruby_packages:
+  - ruby=1:3*  # ruby version v3.*
+  - ruby-dev=1:3*  # ruby-dev version v3.*
+
+# installs ruby from source code from fluentd_ruby_download_url
 # FYI: it takes a while
 fluentd_ruby_install_from_source: false
 
@@ -55,7 +60,7 @@ fluentd_extra_config_file_dir: "{{ fluentd_conf_directory }}/conf.d/ansible"
 
 # start: installation from source
 fluentd_ruby_version: "3.1.0"  # Specify the Ruby version here for installation from source.
-fluentd_ruby_download_url: "https://cache.ruby-lang.org/pub/ruby/3.1/ruby-{{ fluentd_ruby_version }}.tar.gz"
+fluentd_ruby_download_url: "https://cache.ruby-lang.org/pub/ruby/3.1/ruby-3.1.0.tar.gz"  # update this url with correct link to ruby release
 fluentd_ruby_install_path: "/opt/ruby"
 fluentd_ruby_bin_path: "/opt/ruby/{{ fluentd_ruby_version }}/bin/ruby"
 # end: installation from source
