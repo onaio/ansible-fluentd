@@ -1,7 +1,24 @@
 onaio - Fluentd [![Build Status](https://github.com/onaio/ansible-fluentd/workflows/CI/badge.svg)](https://github.com/onaio/ansible-fluentd/actions?query=workflow%3ACI)
 =========
 
-Ansible role that installs and configures Fluentd. This role installs `td-agent`. See [differences between td-agent and Fluentd here](https://www.fluentd.org/faqs).
+Ansible role that installs and configures [Fluentd](https://docs.fluentd.org/) as a [ruby gem](https://docs.fluentd.org/installation/install-by-gem).
+
+> NOTE: When running fluentd command on the server i.e. /opt/fluent/lib/bin/fluentd, ensure that the following  environment variables have been set:
+> - GEM_PATH={{ fluentd_lib_directory }} e.g. GEM_PATH=/opt/fluent/lib
+> - GEM_HOME={{ fluentd_lib_directory }} e.g. GEM_HOME=/opt/fluent/lib
+> - or alternatively specify the `bashrc` or `/etc/environment` files to be updated with `fluentd_system_environment_files: []`
+
+
+Supported Ubuntu Versions
+------------
+
+| Version | Supported          |
+|---------|--------------------|
+| 24.04   | :white_check_mark: |
+| 22.04   | :white_check_mark: |
+| 20.04   | :white_check_mark: |
+| 18.04   | :white_check_mark: |
+
 
 Requirements
 ------------
@@ -15,34 +32,65 @@ Check the [defaults/main.yml](./defaults/main.yml) file for the full list of def
 
 ```yml
 ---
-# version of td-agent
-fluentd_td_version: "4"
-# name of the td-agent service
-fluentd_service_name: "td-agent"
-# system user for td-agent service
-fluentd_system_user: "td-agent"
-# list of groups to add the td-agent user to
+# fluentd version https://github.com/fluent/fluentd/releases
+fluentd_version: "1.17.1"
+fluentd_service_name: "fluentd"
+fluentd_system_user: "fluentd"
+fluentd_system_group: "fluentd"
+fluentd_conf_directory: "/etc/fluent"
+fluentd_conf_file: "fluent.conf"
+fluentd_log_directory: "/var/log/fluent"
+fluentd_log_file: "fluentd.log"
+fluentd_lib_directory: "/opt/fluent/lib"
+fluentd_gem_home_directory: "{{ fluentd_lib_directory }}"
+fluentd_gem_path_directory: "{{ fluentd_lib_directory }}"
+fluentd_plugin_directory: "/etc/fluent/plugin"
+
+fluentd_service_template: "etc/systemd/system/{{ fluentd_service_name }}.service.j2"
+fluentd_service_path: "/etc/systemd/system/{{ fluentd_service_name }}.service"
+
+# jemalloc https://github.com/jemalloc/jemalloc/releases confirm compatibility from dockerfile https://github.com/fluent/fluentd-docker-image
+fluentd_jemalloc_version: "5.3.0"
 fluentd_monitoring_groups:
   - adm
 
-# input config
-# directory to store the last read position of a log
-fluentd_source_log_pos_directory: "/var/log/td-agent"
-# log paths to tail
-fluentd_log_paths:
-  - tag: "nginx"
-    path: "/var/log/nginx/*"
+fluentd_extra_config_file_dir: "{{ fluentd_conf_directory }}/conf.d/ansible"
 
-# output config
-fluentd_aws_key_id: ""
-fluentd_aws_secret_key: ""
-fluentd_s3_bucket: "logs"
-fluentd_s3_region: ""
-fluentd_server_owner: ""
-fluentd_server_environment: ""
-fluentd_s3_buffer_file_path: "/var/log/td-agent/s3"
-fluentd_s3_buffer_timekey: "30m"
-fluentd_s3_buffer_timekey_wait: "10m"
+#  omitting version or using ">=0" will represent the latest version
+fluentd_extra_plugins: []
+#  - name: fluent-plugin-gelf
+#  - name: fluent-plugin-influxdb
+#    version: ">=0"
+
+fluentd_configurations: []
+#  - name: nginx-access-log
+#    conf: |
+#      <source>
+#        @type tail
+#        format nginx
+#        pos_file /var/log/fluent/tmp/nginx-access.log.pos
+#        tag nginx.access
+#        path /var/log/nginx/access.log
+#      </source>
+#      <match nginx.access>
+#        @type file
+#        path /var/log/fluent/nginx-access
+#      </match>
+#  - name: syslog
+#    conf: |
+#      <source>
+#        @type syslog
+#        tag graylog2
+#      </source>
+#
+#      <match graylog2.**>
+#        @type gelf
+#        host 127.0.0.1
+#        port 12201
+#        <buffer>
+#          flush_interval 5s
+#        </buffer>
+#      </match>
 ```
 
 Dependencies
@@ -61,17 +109,20 @@ Including an example of how to use your role (for instance, with variables passe
     - role: ansible-fluentd
       fluentd_monitoring_groups:
         - adm
-      fluentd_log_paths:
-        - tag: auth
-          path: /var/log/auth.log*
-        - tag: syslog
-          path: /var/log/syslog*
-      fluentd_aws_key_id: test_key_id
-      fluentd_aws_secret_key: test_secret_key
-      fluentd_s3_bucket: test-bucket
-      fluentd_s3_region: eu-west-1
-      fluentd_server_owner: ona
-      fluentd_server_environment: test
+      fluentd_configurations:
+        - name: nginx-access-log
+          conf: |
+            <source>
+              @type tail
+              format nginx
+              pos_file /var/log/fluent/tmp/nginx-access.log.pos
+              tag nginx.access
+              path /var/log/nginx/access.log
+            </source>
+            <match nginx.access>
+              @type file
+              path /var/log/fluent/nginx-access
+            </match>
 ```
 
 License

@@ -1,0 +1,113 @@
+---
+- name: Set-up ruby | install required packages for ruby build
+  ansible.builtin.apt:
+    name:
+      - build-essential
+      - libssl-dev
+      - zlib1g-dev
+      - libreadline-dev
+      - libyaml-dev
+      - libsqlite3-dev
+      - libxml2-dev
+      - libxslt-dev
+      - autoconf
+      - bison
+      - libgdbm-dev
+      - libncurses5-dev
+      - libffi-dev
+      - gcc
+    state: present
+    update_cache: true
+  tags:
+    - fluentd-setup-ruby-install-required-packages
+    - fluentd-setup-ruby
+
+- name: Set-up ruby | download ruby source code
+  ansible.builtin.get_url:
+    url: "{{ fluentd_ruby_download_url }}"
+    dest: /tmp/ruby-{{ fluentd_ruby_version }}.tar.gz
+    validate_certs: false
+    mode: '0740'
+  tags:
+    - fluentd-setup-ruby-download-src-code
+    - fluentd-setup-ruby
+
+- name: Set-up ruby | create ruby tmp directory /tmp/ruby-{{ fluentd_ruby_version }}
+  ansible.builtin.file:
+    path: "/tmp/ruby-{{ fluentd_ruby_version }}"
+    state: directory
+    mode: '0740'
+  tags:
+    - fluentd-setup-ruby-create-tmp-directory
+    - fluentd-setup-ruby
+
+- name: Set-up ruby | extract ruby source code
+  ansible.builtin.unarchive:
+    src: /tmp/ruby-{{ fluentd_ruby_version }}.tar.gz
+    dest: "/tmp/ruby-{{ fluentd_ruby_version }}"
+    extra_opts:
+      - '--strip-components=1'
+    remote_src: true
+  tags:
+    - fluentd-setup-ruby-extract-release
+    - fluentd-setup-ruby
+
+- name: Set-up ruby | create ruby install directory {{ fluentd_ruby_install_path }}
+  ansible.builtin.file:
+    path: "{{ fluentd_ruby_install_path }}"
+    state: directory
+    mode: '0740'
+    owner: "{{ fluentd_system_user }}"
+    group: "{{ fluentd_system_group }}"
+    recurse: true
+  tags:
+    - fluentd-setup-ruby-create-install-directory
+    - fluentd-setup-ruby
+
+- name: Set-up ruby | configure ruby for installation
+  ansible.builtin.command: ./configure --prefix={{ fluentd_ruby_install_path }}/{{ fluentd_ruby_version }} --config-cache
+  changed_when: true
+  args:
+    chdir: "/tmp/ruby-{{ fluentd_ruby_version }}"
+  tags:
+    - fluentd-setup-ruby-configure
+    - fluentd-setup-ruby
+
+- name: Set-up ruby | compile ruby
+  ansible.builtin.command: make
+  changed_when: true
+  args:
+    chdir: "/tmp/ruby-{{ fluentd_ruby_version }}"
+  tags:
+    - fluentd-setup-ruby-compile
+    - fluentd-setup-ruby
+
+- name: Set-up ruby | install ruby
+  ansible.builtin.command: make install
+  changed_when: true
+  args:
+    chdir: "/tmp/ruby-{{ fluentd_ruby_version }}"
+  tags:
+    - fluentd-setup-ruby-install
+    - fluentd-setup-ruby
+
+- name: Set-up ruby | add setup soft links
+  ansible.builtin.file:
+    src: "{{ fluentd_ruby_install_path }}/{{ fluentd_ruby_version }}/bin/{{ item }}"
+    dest: "/usr/bin/{{ item }}"
+    state: link
+    force: true
+  tags:
+    - fluentd-setup-ruby-setup-soft-links
+    - fluentd-setup-ruby
+  with_items:
+    - ruby
+    - gem
+
+- name: Set-up ruby | clean up source code
+  ansible.builtin.file:
+    path: "/tmp/ruby-{{ fluentd_ruby_version }}"
+    state: absent
+  tags:
+    - fluentd-setup-ruby-install-cleanup
+    - fluentd-setup-ruby

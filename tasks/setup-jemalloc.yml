@@ -1,0 +1,83 @@
+---
+##  wget -O /tmp/jemalloc-4.5.0.tar.bz2 https://github.com/jemalloc/jemalloc/releases/download/4.5.0/jemalloc-4.5.0.tar.bz2 \
+# && cd /tmp && tar -xjf jemalloc-4.5.0.tar.bz2 && cd jemalloc-4.5.0/ \
+# && ./configure && make \
+# && mv lib/libjemalloc.so.2 /usr/lib \
+- name: Set-up jemalloc | fetch jemalloc release {{ fluentd_jemalloc_version }}
+  ansible.builtin.get_url:
+    url: https://github.com/jemalloc/jemalloc/releases/download/{{ fluentd_jemalloc_version }}/jemalloc-{{ fluentd_jemalloc_version }}.tar.bz2
+    dest: /tmp/jemalloc-{{ fluentd_jemalloc_version }}.tar.bz2
+    mode: 0640
+    owner: "{{ fluentd_system_user }}"
+    group: "{{ fluentd_system_group }}"
+  tags:
+    - fluentd-setup-jemalloc-fetch-release
+    - fluentd-setup-jemalloc
+
+- name: Set-up jemalloc | create jemalloc extract directory
+  ansible.builtin.file:
+    path: "/tmp/jemalloc-{{ fluentd_jemalloc_version }}"
+    state: directory
+    mode: '0770'
+    owner: "{{ fluentd_system_user }}"
+    group: "{{ fluentd_system_group }}"
+  tags:
+    - fluentd-setup-jemalloc-create-extract-directory
+    - fluentd-setup-jemalloc
+
+- name: Set-up jemalloc | extract release
+  ansible.builtin.unarchive:
+    src: "/tmp/jemalloc-{{ fluentd_jemalloc_version }}.tar.bz2"
+    dest: "/tmp/jemalloc-{{ fluentd_jemalloc_version }}"
+    extra_opts:
+      - '--strip-components=1'
+    remote_src: true
+  tags:
+    - fluentd-setup-jemalloc-extract-release
+    - fluentd-setup-jemalloc
+
+- name: Set-up jemalloc | disable madv free
+  ansible.builtin.shell: |
+    echo "je_cv_madv_free=no" > /tmp/jemalloc-{{ fluentd_jemalloc_version }}/config.cache
+  changed_when: true
+  tags:
+    - fluentd-setup-jemalloc-disable-madv-release
+    - fluentd-setup-jemalloc
+
+- name: Set-up jemalloc | run configure
+  ansible.builtin.command: ./configure -C
+  args:
+    chdir: "/tmp/jemalloc-{{ fluentd_jemalloc_version }}"
+  changed_when: true
+  tags:
+    - fluentd-setup-jemalloc-build-release
+    - fluentd-setup-jemalloc
+
+- name: Set-up jemalloc | compile jemalloc
+  ansible.builtin.command: make
+  args:
+    chdir: "/tmp/jemalloc-{{ fluentd_jemalloc_version }}"
+  changed_when: true
+  tags:
+    - fluentd-setup-jemalloc-compile-release
+    - fluentd-setup-jemalloc
+
+- name: Set-up jemalloc | move jemalloc
+  ansible.builtin.copy:
+    src: "/tmp/jemalloc-{{ fluentd_jemalloc_version }}/lib/libjemalloc.so.2"
+    dest: "{{ fluentd_lib_directory }}"
+    owner: "{{ fluentd_system_user }}"
+    group: "{{ fluentd_system_group }}"
+    mode: '0750'
+    remote_src: true
+  tags:
+    - fluentd-setup-jemalloc-move-release
+    - fluentd-setup-jemalloc
+
+- name: Set-up jemalloc | clean up source code
+  ansible.builtin.file:
+    path: "/tmp/jemalloc-{{ fluentd_jemalloc_version }}"
+    state: absent
+  tags:
+    - fluentd-setup-jemalloc-install-cleanup
+    - fluentd-setup-jemalloc

@@ -1,0 +1,19 @@
+---
+- name: Initialize-env | ensure system group exists {{ fluentd_system_group }}
+  ansible.builtin.group:
+    name: "{{ fluentd_system_group }}"
+    state: present
+  tags:
+    - fluentd-initialize-env-create-group
+    - fluentd-initialize-env
+
+- name: Initialize-env | create system user {{ fluentd_system_user }}
+  ansible.builtin.user:
+    name: "{{ fluentd_system_user }}"
+    group: "{{ fluentd_system_group }}"
+    shell: /sbin/nologin
+    create_home: false
+    state: present
+  tags:
+    - fluentd-initialize-env-create-user
+    - fluentd-initialize-env

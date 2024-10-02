@@ -1,0 +1,12 @@
+---
+- name: Setup-legacy | copy Fluentd configuration
+  ansible.builtin.template:
+    src: s3-legacy.conf.j2
+    dest: "{{ fluentd_extra_config_file_dir }}/s3-legacy.conf"
+    owner: "{{ fluentd_system_user }}"
+    group: "{{ fluentd_system_group }}"
+    mode: 0640
+  notify: restart fluentd
+  tags:
+    - fluentd-setup-legacy-copy-configuration
+    - fluentd-setup-legacy

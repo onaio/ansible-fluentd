@@ -1,13 +1,54 @@
 ---
-- name: Copy Fluentd configuration
-  template:
-    src: td-agent.conf.j2
-    dest: /etc/td-agent/td-agent.conf
-  notify: restart fluentd
+- name: Configure | add extra fluentd plugin(s)
+  ansible.builtin.shell: |
+    {{ fluentd_lib_directory }}/bin/fluent-gem install {{ item.name }} -v {{ item.version | default('>=0') | quote }} --no-document
+  with_items: "{{ fluentd_extra_plugins }}"
+  environment:
+    GEM_PATH: "{{ fluentd_lib_directory }}"
+    GEM_HOME: "{{ fluentd_lib_directory }}"
+  changed_when: true
+  when: fluentd_extra_plugins | length > 0
+  tags:
+    - fluentd-configure-add-extra-plugins
+    - fluentd-configure
 
-- name: Add Fluentd system user to groups
-  user:
+- name: Configure | populate fluentd configuration
+  ansible.builtin.template:
+    src: "fluentd.conf.j2"
+    dest: "{{ fluentd_conf_directory }}/{{ fluentd_conf_file }}"
+    owner: "{{ fluentd_system_user }}"
+    group: "{{ fluentd_system_group }}"
+    mode: 0640
+  tags:
+    - fluentd-configure-populate-configuration
+    - fluentd-configure
+
+- name: Configure | add fluentd system user to groups
+  ansible.builtin.user:
     name: "{{ fluentd_system_user }}"
     groups: "{{ fluentd_monitoring_groups }}"
     append: true
-  notify: restart fluentd
+  tags:
+    - fluentd-configure-append-to-monitoring-groups
+    - fluentd-configure
+
+- name: Configure | setup service {{ fluentd_service_name }}
+  ansible.builtin.template:
+    src: "{{ fluentd_service_template }}"
+    dest: "{{ fluentd_service_path }}"
+    owner: "{{ fluentd_system_user }}"
+    group: "{{ fluentd_system_group }}"
+    mode: 0640
+  tags:
+    - fluentd-configure-fluentd-service
+    - fluentd-configure
+
+- name: Configure | start service {{ fluentd_service_name }}
+  ansible.builtin.systemd_service:
+    state: started
+    daemon_reload: true
+    enabled: true
+    name: "{{ fluentd_service_name }}"
+  tags:
+    - fluentd-configure-start-fluentd-service
+    - fluentd-configure

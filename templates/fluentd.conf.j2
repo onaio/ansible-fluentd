@@ -1,0 +1,9 @@
+# {{ ansible_managed }}
+
+{% for configuration in fluentd_configurations %}
+@include "{{ fluentd_extra_config_file_dir }}/{{ configuration.name }}.conf"
+{% endfor %}
+
+{% if fluentd_s3_bucket_legacy %}
+@include "{{ fluentd_extra_config_file_dir }}/s3-legacy.conf.j2"
+{% endif %}

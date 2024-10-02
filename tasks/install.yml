@@ -1,17 +1,77 @@
 ---
-- name: Add td-agent apt key
-  apt_key:
-    url: https://packages.treasuredata.com/GPG-KEY-td-agent
+- name: Install | add GEM_HOME to fluentd_system_environment_files
+  ansible.builtin.lineinfile:
+    dest: "{{ item }}"
     state: present
+    regexp: "^GEM_HOME="
+    line: 'GEM_HOME="{{ fluentd_gem_home_directory }}"'
+  with_items: "{{ fluentd_system_environment_files }}"
+  when: fluentd_system_environment_files | length > 0
+  tags:
+    - fluentd-install-update-gem-home
+    - fluentd-install
 
-- name: Add treasure data repository to apt
-  apt_repository:
-    repo: deb http://packages.treasuredata.com/{{ fluentd_td_version }}/ubuntu/{{ ansible_distribution_release }}/ {{ ansible_distribution_release }} contrib
+- name: Install | add GEM_PATH to fluentd_system_environment_files
+  ansible.builtin.lineinfile:
+    dest: "{{ item }}"
     state: present
-    filename: treasure-data
+    regexp: "^GEM_PATH="
+    line: 'GEM_PATH="{{ fluentd_gem_path_directory }}"'
+  with_items: "{{ fluentd_system_environment_files }}"
+  when: fluentd_system_environment_files | length > 0
+  tags:
+    - fluentd-install-update-gem-path
+    - fluentd-install
 
-- name: Install td-agent
-  apt:
-    name: td-agent
+## Install Ruby >= 2.4 on your local environment. In addition, install ruby-dev package via Package Manager to build native extension gems.
+- name: Install | ruby packages
+  ansible.builtin.apt:
+    name: "{{ item }}"
+    state: present
     update_cache: true
-    state: present
+  when:
+    - not fluentd_ruby_install_from_source and ((ansible_distribution != "Ubuntu") or (ansible_distribution == "Ubuntu" and ansible_distribution_major_version | int > 20))
+  tags:
+    - fluentd-install-ruby-packages
+    - fluentd-install
+  with_items:
+    - gcc
+    - build-essential
+    - "{{ fluentd_ruby_packages }}"
+
+- name: Install | create fluentd lib directory {{ fluentd_lib_directory }}
+  ansible.builtin.file:
+    path: "{{ fluentd_lib_directory }}"
+    state: directory
+    mode: '0750'
+    owner: "{{ fluentd_system_user }}"
+    group: "{{ fluentd_system_group }}"
+    recurse: true
+  tags:
+    - fluentd-install-create-lib-directory
+    - fluentd-install
+
+- name: Install | add fluentd gem(s)
+  ansible.builtin.shell: |
+    gem install {{ item.name }} -v {{ item.version | default('>=0') | quote }} --no-document
+  with_items: "{{ fluentd_required_gems }}"
+  environment:
+    GEM_PATH: "{{ fluentd_lib_directory }}"
+    GEM_HOME: "{{ fluentd_lib_directory }}"
+  changed_when: true
+  when:
+    - fluentd_required_gems | length > 0
+  tags:
+    - fluentd-install-add-gems
+    - fluentd-install
+
+- name: Install | fluentd {{ fluentd_version }}
+  ansible.builtin.shell: |
+    gem install fluentd -v {{ fluentd_version }} --no-document
+  environment:
+    GEM_PATH: "{{ fluentd_lib_directory }}"
+    GEM_HOME: "{{ fluentd_lib_directory }}"
+  changed_when: true
+  tags:
+    - fluentd-install-fluentd
+    - fluentd-install

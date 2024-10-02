@@ -1,6 +1,48 @@
 ---
-- name: Install Fluentd
-  include_tasks: install.yml
+- name: Initialize env
+  ansible.builtin.include_tasks: initialize-env.yml
+  tags:
+    - fluentd-initialize-env
+    - fluentd
 
-- name: Configure Fluentd
-  include_tasks: configure.yml
+# Setup ruby for ubuntu <= 20 or fluentd_ruby_install_from_source: true
+- name: Setup ruby
+  ansible.builtin.include_tasks: setup-ruby.yml
+  when:
+    - fluentd_ruby_install_from_source or (ansible_distribution == "Ubuntu" and ansible_distribution_major_version | int <= 20)
+  tags:
+    - fluentd-setup-ruby
+    - fluentd
+
+- name: Install fluentd
+  ansible.builtin.include_tasks: install.yml
+  tags:
+    - fluentd-install
+    - fluentd
+
+- name: Setup
+  ansible.builtin.include_tasks: setup.yml
+  when: not fluentd_s3_bucket_legacy
+  tags:
+    - fluentd-setup
+    - fluentd
+
+- name: Setup-legacy
+  ansible.builtin.include_tasks: setup-legacy.yml
+  when: fluentd_s3_bucket_legacy
+  tags:
+    - fluentd-setup-legacy
+    - fluentd-setup
+    - fluentd
+
+- name: Setup-jemalloc
+  ansible.builtin.include_tasks: setup-jemalloc.yml
+  tags:
+    - fluentd-setup-jemalloc
+    - fluentd
+
+- name: Configure fluentd
+  ansible.builtin.include_tasks: configure.yml
+  tags:
+    - fluentd-configure
+    - fluentd

@@ -1,0 +1,39 @@
+---
+- name: Set-up | create fluentd config directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0740'
+    owner: "{{ fluentd_system_user }}"
+    group: "{{ fluentd_system_group }}"
+    recurse: true
+  with_items:
+    - "{{ fluentd_conf_directory }}"
+    - "{{ fluentd_extra_config_file_dir }}"
+  tags:
+    - fluentd-setup-create-config-directory
+    - fluentd-setup
+
+- name: Set-up | create fluentd log directory {{ fluentd_log_directory }}
+  ansible.builtin.file:
+    path: "{{ fluentd_log_directory }}"
+    state: directory
+    mode: '0740'
+    owner: "{{ fluentd_system_user }}"
+    group: "{{ fluentd_system_group }}"
+    recurse: true
+  tags:
+    - fluentd-setup-create-log-directory
+    - fluentd-setup
+
+- name: Set-up | create fluentd conf file(s)
+  ansible.builtin.copy:
+    dest: "{{ fluentd_extra_config_file_dir }}/{{ item.name }}.conf"
+    content: "{{ item.conf }}"
+    owner: "{{ fluentd_system_user }}"
+    group: "{{ fluentd_system_group }}"
+    mode: 0640
+  with_items: "{{ fluentd_configurations }}"
+  tags:
+    - fluentd-setup-create-conf-file
+    - fluentd-setup

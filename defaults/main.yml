@@ -1,19 +1,46 @@
 ---
-fluentd_td_version: "4"
-fluentd_service_name: "td-agent"
-fluentd_system_user: "td-agent"
+fluentd_version: "1.17.1"
+fluentd_service_name: "fluentd"
+fluentd_system_user: "fluentd"
+fluentd_system_group: "fluentd"
+fluentd_conf_directory: "/etc/fluent"
+fluentd_conf_file: "fluent.conf"
+fluentd_log_directory: "/var/log/fluent"
+fluentd_log_file: "fluentd.log"
+fluentd_lib_directory: "/opt/fluent/lib"
+fluentd_gem_home_directory: "{{ fluentd_lib_directory }}"
+fluentd_gem_path_directory: "{{ fluentd_lib_directory }}"
+fluentd_plugin_directory: "/etc/fluent/plugin"
+fluentd_system_environment_files: []
+
+# sets the ruby version to install when from linux distribution repositories
+fluentd_ruby_packages:
+  - ruby=1:3*  # ruby version v3.*
+  - ruby-dev=1:3*  # ruby-dev version v3.*
+
+# installs ruby from source code from fluentd_ruby_download_url
+# FYI: it takes a while
+fluentd_ruby_install_from_source: false
+
+fluentd_service_template: "etc/systemd/system/{{ fluentd_service_name }}.service.j2"
+fluentd_service_path: "/etc/systemd/system/{{ fluentd_service_name }}.service"
+
+# jemalloc https://github.com/jemalloc/jemalloc/releases confirm compatibility from dockerfile https://github.com/fluent/fluentd-docker-image
+fluentd_jemalloc_version: "5.3.0"
 fluentd_monitoring_groups:
   - adm
 
 # input config
-fluentd_source_log_pos_directory: "/var/log/td-agent/pos"
+fluentd_source_log_pos_directory: "{{ fluentd_log_directory }}/pos"
+
+#  start deprecated
+#  use fluentd_configurations instead
+
 fluentd_log_paths:
   - tag: auth
     path: /var/log/auth.log*
   - tag: syslog
     path: /var/log/syslog*
-
-# output config
 fluentd_aws_key_id: ""
 fluentd_aws_secret_key: ""
 fluentd_s3_bucket: "logs"
@@ -24,3 +51,65 @@ fluentd_server_private_ipv4_address: "{{ ansible_default_ipv4.address | default(
 fluentd_s3_buffer_file_path: "/var/log/td-agent/s3"
 fluentd_s3_buffer_timekey: "30m"
 fluentd_s3_buffer_timekey_wait: "10m"
+#  end deprecated
+
+# when true it includes legacy s3 configuration to td-agent.conf otherwise it uses fluentd_configurations
+fluentd_s3_bucket_legacy: false
+
+fluentd_extra_config_file_dir: "{{ fluentd_conf_directory }}/conf.d/ansible"
+
+# start: installation from source
+fluentd_ruby_version: "3.1.0"  # Specify the Ruby version here for installation from source.
+fluentd_ruby_download_url: "https://cache.ruby-lang.org/pub/ruby/3.1/ruby-3.1.0.tar.gz"  # update this url with correct link to ruby release
+fluentd_ruby_install_path: "/opt/ruby"
+fluentd_ruby_bin_path: "/opt/ruby/{{ fluentd_ruby_version }}/bin/ruby"
+# end: installation from source
+
+# confirm compatibility from the official dockerfile https://github.com/fluent/fluentd-docker-image
+fluentd_required_gems:
+  - name: oj
+    version: 3.16.5
+  - name: json
+    version: 2.7.2
+  - name: rexml
+    version: 3.3.5
+  - name: async
+    version: 1.32.1
+  - name: async-http
+    version: 0.64.2
+
+#  omitting version or using ">=0" will represent the latest version
+fluentd_extra_plugins: []
+#  - name: fluent-plugin-gelf
+#  - name: fluent-plugin-influxdb
+#    version: ">=0"
+
+fluentd_configurations: []
+#  - name: nginx-access-log
+#    conf: |
+#      <source>
+#        @type tail
+#        format nginx
+#        pos_file /var/log/fluent/tmp/nginx-access.log.pos
+#        tag nginx.access
+#        path /var/log/nginx/access.log
+#      </source>
+#      <match nginx.access>
+#        @type file
+#        path /var/log/fluent/nginx-access
+#      </match>
+#  - name: syslog
+#    conf: |
+#      <source>
+#        @type syslog
+#        tag graylog2
+#      </source>
+#
+#      <match graylog2.**>
+#        @type gelf
+#        host 127.0.0.1
+#        port 12201
+#        <buffer>
+#          flush_interval 5s
+#        </buffer>
+#      </match>
