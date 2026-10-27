@@ -6,7 +6,7 @@
     owner: "{{ fluentd_system_user }}"
     group: "{{ fluentd_system_group }}"
     mode: 0640
-  notify: restart fluentd
+  notify: Restart fluentd
   tags:
     - fluentd-setup-legacy-copy-configuration
     - fluentd-setup-legacy
